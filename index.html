@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 让手机自动适配屏幕，不会变形 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点击切换图片</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* 让图片铺满屏幕，点击任意位置都生效 */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #000;
+            cursor: pointer;
+        }
+        /* 图片自适应屏幕大小 */
+        img {
+            max-width: 100%;
+            max-height: 100vh;
+            object-fit: contain;
+            display: block;
+        }
+    </style>
+</head>
+ 
+<body>
+    <img id="changeImg" src="">
+ 
+    <script>
+        // 8组图片：每组 [第一张, 第二张]
+        const groups = {
+            1: ["https://img.ikunyi.com/images/20260815/6a80128934ead.jpg", "https://img.kundeep.com/images/20260824/6a8bf73705e5c.jpg"],
+            2: ["https://img.ikunyi.com/images/20260815/6a8020e3c4fa3.jpg", "https://img.kundeep.com/images/20260824/6a8bf76e4c554.jpg"],
+            3: ["https://img.ikunyi.com/images/20260815/6a80210f1e93f.jpg", "https://img.kundeep.com/images/20260824/6a8bf77eedadd.jpg"],
+            4: ["https://img.ikunyi.com/images/20260815/6a80212943b20.jpg", "https://img.kundeep.com/images/20260824/6a8bf793eee3e.jpg"],
+            5: ["https://img.ikunyi.com/images/20260815/6a802140e766a.jpg", "https://img.kundeep.com/images/20260824/6a8bf7a39b1c7.jpg"],
+            6: ["https://img.ikunyi.com/images/20260815/6a80215f29466.jpg", "https://img.kundeep.com/images/20260824/6a8bf7b0e1beb.jpg"],
+            7: ["https://img.ikunyi.com/images/20260815/6a802179f2d25.jpg", "https://img.kundeep.com/images/20260824/6a8bf7c0aee52.jpg"],
+            8: ["https://img.ikunyi.com/images/20260815/6a802191568bf.jpg", "https://img.kundeep.com/images/20260824/6a8bf7cd78d3b.jpg"],
+            9: ["https://img.kundeep.com/images/20260916/6aa9ec7448c3f.jpg", "https://img.kundeep.com/images/20260916/6aa9f7f1b08e9.png"],
+        };
+ 
+        // 从 URL 读取 ?group=数字，默认第 1 组
+        const params = new URLSearchParams(location.search);
+        const groupNum = parseInt(params.get("group")) || 1;
+        const [img1, img2] = groups[groupNum] || groups[1];
+ 
+        const img = document.getElementById("changeImg");
+        img.src = img1;
+ 
+        // 单击屏幕切换图片：只切一次，切完不再跳回
+        document.body.onclick = function () {
+            img.src = img2;
+            document.body.onclick = null; // 切换一次后解绑，不再跳回
+        };
+    </script>
+</body>
+</html>
