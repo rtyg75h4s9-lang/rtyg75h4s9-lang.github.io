@@ -4,21 +4,25 @@
     <meta charset="UTF-8">
     <!-- 让手机自动适配屏幕，不会变形 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>点击切换图片</title>
+    <title>CCS 电子证书验证</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        /* 让图片铺满屏幕，点击任意位置都生效 */
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             background: #000;
-            cursor: pointer;
+        }
+        /* 图片容器，热区按图片实际显示尺寸定位 */
+        .stage {
+            position: relative;
+            display: inline-block;
+            line-height: 0;
         }
         /* 图片自适应屏幕大小 */
         img {
@@ -27,14 +31,24 @@
             object-fit: contain;
             display: block;
         }
+        /* 透明热区：覆盖在图片的 View E-Certificate 按钮上 */
+        #hot {
+            position: absolute;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
     </style>
 </head>
- 
+
 <body>
-    <img id="changeImg" src="">
- 
+    <div class="stage">
+        <img id="changeImg" src="" alt="">
+        <div id="hot"></div>
+    </div>
+
     <script>
-        // 8组图片：每组 [第一张, 第二张]
+        // 9组图片：每组 [验证页截图, 证书详情]
         const groups = {
             1: ["https://img.ikunyi.com/images/20260815/6a80128934ead.jpg", "https://img.kundeep.com/images/20260824/6a8bf73705e5c.jpg"],
             2: ["https://img.ikunyi.com/images/20260815/6a8020e3c4fa3.jpg", "https://img.kundeep.com/images/20260824/6a8bf76e4c554.jpg"],
@@ -46,19 +60,42 @@
             8: ["https://img.ikunyi.com/images/20260815/6a802191568bf.jpg", "https://img.kundeep.com/images/20260824/6a8bf7cd78d3b.jpg"],
             9: ["https://img.kundeep.com/images/20260917/6aabee8d73563.jpg", "https://img.kundeep.com/images/20260917/6aabf32e6a79a.png"],
         };
- 
+
+        // 每组按钮热区：相对图片的 [左%, 上%, 宽%, 高%]
+        // 通过像素扫描第一张图里的蓝色按钮得出，已加少量边距方便点击
+        const zones = {
+            1: [8.8, 50.1, 82.3, 6.0],
+            2: [8.8, 50.1, 82.3, 5.9],
+            3: [8.8, 50.1, 82.3, 6.0],
+            4: [8.8, 50.2, 82.3, 5.9],
+            5: [9.1, 50.2, 82.0, 6.0],
+            6: [8.8, 50.2, 82.3, 6.0],
+            7: [8.7, 50.2, 82.2, 5.9],
+            8: [8.8, 50.2, 82.2, 6.0],
+            9: [8.6, 49.0, 82.9, 5.9],
+        };
+        // 新组没有单独标定时用这个默认热区
+        const defaultZone = [8.8, 49.5, 82.4, 6.2];
+
         // 从 URL 读取 ?group=数字，默认第 1 组
         const params = new URLSearchParams(location.search);
         const groupNum = parseInt(params.get("group")) || 1;
-        const [img1, img2] = groups[groupNum] || groups[1];
- 
+        const pair = groups[groupNum] || groups[1];
+        const zone = zones[groupNum] || defaultZone;
+
         const img = document.getElementById("changeImg");
-        img.src = img1;
- 
-        // 单击屏幕切换图片：只切一次，切完不再跳回
-        document.body.onclick = function () {
-            img.src = img2;
-            document.body.onclick = null; // 切换一次后解绑，不再跳回
+        const hot = document.getElementById("hot");
+        img.src = pair[0];
+
+        hot.style.left = zone[0] + "%";
+        hot.style.top = zone[1] + "%";
+        hot.style.width = zone[2] + "%";
+        hot.style.height = zone[3] + "%";
+
+        // 只有按钮热区可以跳转：点击后切到证书，只切一次，切完热区失效
+        hot.onclick = function () {
+            img.src = pair[1];
+            hot.style.display = "none";
         };
     </script>
 </body>
