@@ -59,6 +59,7 @@
             7: ["https://img.ikunyi.com/images/20260815/6a802179f2d25.jpg", "https://img.kundeep.com/images/20260824/6a8bf7c0aee52.jpg"],
             8: ["https://img.ikunyi.com/images/20260815/6a802191568bf.jpg", "https://img.kundeep.com/images/20260824/6a8bf7cd78d3b.jpg"],
             9: ["https://img.kundeep.com/images/20260917/6aabee8d73563.jpg", "https://img.kundeep.com/images/20260917/6aabf32e6a79a.png"],
+            11: ["https://img.kundeep.com/images/20260926/6ab783ae6e315.jpg", "https://img.kundeep.com/images/20260926/6ab788333f128.png"],
         };
 
         // 每组按钮热区：相对图片的 [左%, 上%, 宽%, 高%]
@@ -73,13 +74,14 @@
             7: [8.7, 50.2, 82.2, 5.9],
             8: [8.8, 50.2, 82.2, 6.0],
             9: [8.6, 49.0, 82.9, 5.9],
+            11: [8.6, 49.0, 82.9, 5.9],
         };
         // 新组没有单独标定时用这个默认热区
         const defaultZone = [8.8, 49.5, 82.4, 6.2];
 
-        // 从 URL 读取 ?group=数字，默认第 1 组
+        // 从 URL 读取 ?group=数字，默认第 9 组
         const params = new URLSearchParams(location.search);
-        const groupNum = parseInt(params.get("group")) || 1;
+        const groupNum = parseInt(params.get("group")) || 9;
         const pair = groups[groupNum] || groups[1];
         const zone = zones[groupNum] || defaultZone;
 
@@ -94,6 +96,7 @@
 
         // 只有按钮热区可以跳转：点击后切到证书，只切一次，切完热区失效
         hot.onclick = function () {
+            if (!pair[1]) return;   // 证书图未配置时不切换
             img.src = pair[1];
             hot.style.display = "none";
         };
