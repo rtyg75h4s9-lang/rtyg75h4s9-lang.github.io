@@ -361,19 +361,27 @@
 
         const img = document.getElementById("changeImg");
         const hot = document.getElementById("hot");
-        img.src = pair[0];
 
         hot.style.left = zone[0] + "%";
         hot.style.top = zone[1] + "%";
         hot.style.width = zone[2] + "%";
         hot.style.height = zone[3] + "%";
 
-        // 只有按钮热区可以跳转：点击后切到证书，只切一次，切完热区失效
+        // 按地址栏 hash 决定显示第几张：#2 = 证书图，其它 = 验证页截图
+        function render() {
+            const second = location.hash === "#2";
+            img.src = second && pair[1] ? pair[1] : pair[0];
+            hot.style.display = !second && pair[1] ? "block" : "none";
+        }
+
+        // 点击热区 → 写入 hash（会新增一条浏览记录），返回键即可退回第一张
         hot.onclick = function () {
             if (!pair[1]) return;   // 证书图未配置时不切换
-            img.src = pair[1];
-            hot.style.display = "none";
+            if (location.hash !== "#2") location.hash = "2";
         };
+
+        window.addEventListener("hashchange", render);
+        render();
     </script>
 </body>
 </html>
