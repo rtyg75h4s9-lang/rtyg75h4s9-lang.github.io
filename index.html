@@ -38,6 +38,36 @@
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
+        /* 加载中的提示：盖在图片上方，pointer-events:none 不挡热区点击 */
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.4;          /* 覆盖 .stage 的 line-height:0，否则文字被压没 */
+            font-size: 15px;
+            color: #fff;
+            background: rgba(0, 0, 0, .45);
+            pointer-events: none;
+            z-index: 2;
+        }
+        #loading .spinner {
+            width: 34px;
+            height: 34px;
+            margin-bottom: 10px;
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
@@ -45,6 +75,7 @@
     <div class="stage">
         <img id="changeImg" src="" alt="">
         <div id="hot"></div>
+        <div id="loading"><span class="spinner"></span>加载中…</div>
     </div>
 
     <script>
@@ -361,18 +392,61 @@
 
         const img = document.getElementById("changeImg");
         const hot = document.getElementById("hot");
+        const loading = document.getElementById("loading");
 
         hot.style.left = zone[0] + "%";
         hot.style.top = zone[1] + "%";
         hot.style.width = zone[2] + "%";
         hot.style.height = zone[3] + "%";
 
+        // 已经加载完成的图片地址，命中就直接换图，不显示提示
+        const ready = {};
+        let timer = null;
+
+        // 切换图片：没就绪的图才显示「加载中…」
+        function show(url) {
+            clearTimeout(timer);
+            if (ready[url]) {
+                loading.style.display = "none";
+                img.src = url;
+                return;
+            }
+            // 150ms 内加载完就不弹提示，避免快速切换时闪一下
+            timer = setTimeout(function () {
+                loading.style.display = "flex";
+            }, 150);
+            img.onload = function () {
+                clearTimeout(timer);
+                ready[url] = true;
+                loading.style.display = "none";
+            };
+            img.onerror = function () {
+                clearTimeout(timer);   // 加载失败也要收起提示，不能一直转圈
+                loading.style.display = "none";
+            };
+            img.src = url;
+        }
+
+        // 后台预加载证书图，点热区时基本秒开
+        function preload(url) {
+            if (!url || ready[url]) return;
+            const p = new Image();
+            p.onload = function () { ready[url] = true; };
+            p.src = url;
+        }
+
         // 按地址栏 hash 决定显示第几张：#2 = 证书图，其它 = 验证页截图
         function render() {
             const second = location.hash === "#2";
-            img.src = second && pair[1] ? pair[1] : pair[0];
             hot.style.display = !second && pair[1] ? "block" : "none";
+            show(second && pair[1] ? pair[1] : pair[0]);
         }
+
+        // 首图一出来，就在后台把证书图拉下来
+        img.addEventListener("load", function onFirstLoad() {
+            img.removeEventListener("load", onFirstLoad);
+            preload(pair[1]);
+        });
 
         // 点击热区 → 写入 hash（会新增一条浏览记录），返回键即可退回第一张
         hot.onclick = function () {
