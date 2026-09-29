@@ -21,14 +21,13 @@
         /* 图片容器，热区按图片实际显示尺寸定位 */
         .stage {
             position: relative;
-            display: inline-block;
-            line-height: 0;
+            width: 100%;          /* 与图片同宽，热区百分比才能对准 */
+            line-height: 0;       /* 消除图片底部间隙 */
         }
-        /* 图片自适应屏幕大小 */
+        /* 只按宽度缩放：不依赖 vh/dvh，浏览器工具栏伸缩不会改变图片尺寸、不会出现黑边 */
         img {
-            max-width: 100%;
-            max-height: 100vh;
-            object-fit: contain;
+            width: 100%;
+            height: auto;
             display: block;
         }
         /* 透明热区：覆盖在图片的 View E-Certificate 按钮上 */
